@@ -44,7 +44,6 @@ class queue_model():
                     # requests in buffer, the current request will be processed after the last one
                     last_departure = last_departure + random_var_exp(self.service_rate)
                 departure_times.append(last_departure)
-        self.plot_simulation()
 
     def plot_simulation(self):
         processed_arrivals = []
@@ -64,6 +63,10 @@ class queue_model():
         plt.plot(time, self.departure_times)
         plt.show()
 
+    def print_statistics(self):
+        print("Numer of requests arrived: ", len(self.arrival_times))
+        print("Numer of requests processed: ", len([x for x in self.departure_times if x!=-1]))
+        print("Numer of requests lost: ", len([x for x in self.departure_times if x==-1]))        
 
 if __name__ == "__main__":
     LAMBDA = 300-50*2 # 200
@@ -71,3 +74,15 @@ if __name__ == "__main__":
     
     qm = queue_model(LAMBDA, MU, 1, 10)
     qm.run_simulation()
+    qm.plot_simulation()
+    qm.print_statistics()
+
+    # plot loss rate as a function of the buffer size
+    loss_rates = []
+    for buffer_size in range(1, 10+2*2):
+        qm = queue_model(LAMBDA, MU, 10, buffer_size)
+        qm.run_simulation()
+        loss_rates.append(len([x for x in qm.departure_times if x==-1])/len(qm.departure_times))
+    plt.plot(range(1, 10+2*2), loss_rates)
+    plt.show()
+        
