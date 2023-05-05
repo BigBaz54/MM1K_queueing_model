@@ -14,10 +14,54 @@ class queue_model():
         self.arrival_times = []
         self.departure_times = []
         self.treatment_times = []
+        self.service_times = []
+        self.waiting_times = []
 
-    def get_requests_in_buffer(self, t):
+    def get_requests_in_system(self, t):
         return len([x for x in self.departure_times if (x > t)])
+    
+    def get_requests_in_buffer(self, t):
+        return self.get_requests_in_system(t) - 1 if self.get_requests_in_system(t) > 0 else 0
         
+    def get_time_spent_with_n_requests_in_system(self):
+        # initialize
+        total_time = {i:0 for i in range(self.buffer_size+2)}
+        processed_arrivals = []
+        processed_departures = []
+        for i in range(len(self.arrival_times)):
+            if self.departure_times[i] != -1:
+                # request is processed
+                processed_arrivals.append(self.arrival_times[i])
+                processed_departures.append(self.departure_times[i])
+        
+        if len(processed_arrivals) == 0:
+            return total_time
+        
+        # first interval
+        total_time[0] = processed_arrivals[0]
+        
+        # intermediate intervals
+        requests_in_system = 0
+        for i in range(len(processed_arrivals)-1):
+            requests_in_system += 1
+            time_between_arrivals = processed_arrivals[i+1] - processed_arrivals[i]
+            requests_processed_in_interval = [x for x in processed_departures if (x >= processed_arrivals[i] and x < processed_arrivals[i+1])]
+            if len(requests_processed_in_interval) == 0:
+                total_time[requests_in_system] += time_between_arrivals
+            else:
+                for j in range(len(requests_processed_in_interval)):
+                    if j == 0:
+                        total_time[requests_in_system] += requests_processed_in_interval[0] - processed_arrivals[i]
+                    else:
+                        total_time[requests_in_system] += requests_processed_in_interval[j] - requests_processed_in_interval[j-1]
+                    requests_in_system -= 1
+                total_time[requests_in_system] += processed_arrivals[i+1] - requests_processed_in_interval[-1]
+        
+        # last interval
+        requests_in_system += 1
+        total_time[requests_in_system] += self.departure_times[-1] - processed_arrivals[-1]
+        
+        return total_time
 
     def run_simulation(self):
         # Initialize
@@ -28,6 +72,8 @@ class queue_model():
         arrival_times = self.arrival_times
         departure_times = self.departure_times
         treatment_times = self.treatment_times
+        service_times = self.service_times
+        waiting_times = self.waiting_times
         
         # Run simulation
         while last_arrival < self.observation_time:
@@ -37,6 +83,9 @@ class queue_model():
             if nb_requests_in_buffer >= self.buffer_size:
                 # request is lost
                 departure_times.append(-1)
+                treatment_times.append(-1)
+                service_times.append(-1)
+                waiting_times.append(-1)
             else:
                 # request is processed
                 treatment_time = random_var_exp(self.service_rate)
@@ -48,6 +97,8 @@ class queue_model():
                     last_departure = last_departure + treatment_time
                 departure_times.append(last_departure)
                 treatment_times.append(treatment_time)
+                service_times.append(last_departure - last_arrival)
+                waiting_times.append(last_departure - last_arrival - treatment_time if last_departure - last_arrival - treatment_time >= 0 else 0)
 
 
     def plot_simulation(self):
@@ -72,18 +123,18 @@ class queue_model():
         print("Number of requests arrived:", len(self.arrival_times))
         print("Number of requests processed:", len([x for x in self.departure_times if x!=-1]))
         print("Number of requests lost:", len([x for x in self.departure_times if x==-1]))
-        print("Output rate:", len([x for x in self.departure_times if x!=-1])/self.observation_time, "requests per time unit")
-        print("Average treatment time:", np.mean(self.treatment_times), "time units")
-        service_times = [self.departure_times[i]-self.arrival_times[i] for i in range(len(self.arrival_times)) if self.departure_times[i]!=-1]
-        waiting_times = [service_times[i]-self.treatment_times[i] for i in range( len(service_times)) if service_times[i]!=-1]
-        print("Average waiting time:", np.mean(waiting_times), "time units")
+        print("Output rate:", len([x for x in self.departure_times if x!=-1])/self.departure_times[-1], "requests per time unit")
+        print("Average service time:", np.mean([x for x in self.service_times if x!=-1]), "time units")
+        print("Average treatment time:", np.mean([x for x in self.treatment_times if x!=-1]), "time units")
+        print("Average waiting time:", np.mean([x for x in self.waiting_times if x!=-1]), "time units")
+        print("Average number of requests in system:", sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.departure_times[-1]), "requests")
 
 
 if __name__ == "__main__":
     LAMBDA = 300-50*2 # 200
     MU = 1/(2*2/1000) # 250
     
-    qm = queue_model(LAMBDA, MU, 1, 10)
+    qm = queue_model(LAMBDA, MU, 2, 5)
     qm.run_simulation()
     qm.plot_simulation()
     qm.print_statistics()
