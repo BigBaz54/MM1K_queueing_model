@@ -1,0 +1,5 @@
+- temps moyen d'attente
+- temps moyen de service
+- nombre moyen de requêtes dans le système
+- taux d'occupation du serveur
+- débit

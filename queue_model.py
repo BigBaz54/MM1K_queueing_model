@@ -13,6 +13,7 @@ class queue_model():
         self.buffer_size = buffer_size
         self.arrival_times = []
         self.departure_times = []
+        self.treatment_times = []
 
     def get_requests_in_buffer(self, t):
         return len([x for x in self.departure_times if (x > t)])
@@ -26,6 +27,7 @@ class queue_model():
         self.departure_times = []
         arrival_times = self.arrival_times
         departure_times = self.departure_times
+        treatment_times = self.treatment_times
         
         # Run simulation
         while last_arrival < self.observation_time:
@@ -37,13 +39,16 @@ class queue_model():
                 departure_times.append(-1)
             else:
                 # request is processed
+                treatment_time = random_var_exp(self.service_rate)
                 if nb_requests_in_buffer == 0:
                     # no requests in buffer, the current request will be processed immediately
-                    last_departure = last_arrival + random_var_exp(self.service_rate)
+                    last_departure = last_arrival + treatment_time
                 else:
                     # requests in buffer, the current request will be processed after the last one
-                    last_departure = last_departure + random_var_exp(self.service_rate)
+                    last_departure = last_departure + treatment_time
                 departure_times.append(last_departure)
+                treatment_times.append(treatment_time)
+
 
     def plot_simulation(self):
         processed_arrivals = []
@@ -64,9 +69,16 @@ class queue_model():
         plt.show()
 
     def print_statistics(self):
-        print("Numer of requests arrived: ", len(self.arrival_times))
-        print("Numer of requests processed: ", len([x for x in self.departure_times if x!=-1]))
-        print("Numer of requests lost: ", len([x for x in self.departure_times if x==-1]))        
+        print("Number of requests arrived: ", len(self.arrival_times))
+        print("Number of requests processed: ", len([x for x in self.departure_times if x!=-1]))
+        print("Number of requests lost: ", len([x for x in self.departure_times if x==-1]))
+        print("Average number of requests in system: ", np.mean([self.get_requests_in_buffer(t) for t in self.arrival_times]))
+        print("Debit: ", len([x for x in self.departure_times if x!=-1])/self.departure_times[-1])
+        print("Average treatment time: ", np.mean(self.treatment_times))
+        average_service_time = [self.departure_times[i]-self.arrival_times[i] for i in range(len(self.arrival_times)) if self.departure_times[i]!=-1]
+        average_waiting_time = [ average_service_time[i]-self.treatment_times[i] for i in range( len(average_service_time)) if average_service_time[i]!=-1]
+        print("Average waiting time: ", np.mean(average_waiting_time))
+
 
 if __name__ == "__main__":
     LAMBDA = 300-50*2 # 200
