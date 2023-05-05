@@ -124,6 +124,7 @@ class queue_model():
         print("Number of requests processed:", len([x for x in self.departure_times if x!=-1]))
         print("Number of requests lost:", len([x for x in self.departure_times if x==-1]))
         print("Output rate:", len([x for x in self.departure_times if x!=-1])/self.departure_times[-1], "requests per time unit")
+        print("Loss rate:", round(len([x for x in self.departure_times if x==-1])/len(self.departure_times), 4)*100, "%")
         print("Average service time:", np.mean([x for x in self.service_times if x!=-1]), "time units")
         print("Average treatment time:", np.mean([x for x in self.treatment_times if x!=-1]), "time units")
         print("Average waiting time:", np.mean([x for x in self.waiting_times if x!=-1]), "time units")
