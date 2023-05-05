@@ -69,15 +69,14 @@ class queue_model():
         plt.show()
 
     def print_statistics(self):
-        print("Number of requests arrived: ", len(self.arrival_times))
-        print("Number of requests processed: ", len([x for x in self.departure_times if x!=-1]))
-        print("Number of requests lost: ", len([x for x in self.departure_times if x==-1]))
-        print("Average number of requests in system: ", np.mean([self.get_requests_in_buffer(t) for t in self.arrival_times]))
-        print("Debit: ", len([x for x in self.departure_times if x!=-1])/self.departure_times[-1])
-        print("Average treatment time: ", np.mean(self.treatment_times))
-        average_service_time = [self.departure_times[i]-self.arrival_times[i] for i in range(len(self.arrival_times)) if self.departure_times[i]!=-1]
-        average_waiting_time = [ average_service_time[i]-self.treatment_times[i] for i in range( len(average_service_time)) if average_service_time[i]!=-1]
-        print("Average waiting time: ", np.mean(average_waiting_time))
+        print("Number of requests arrived:", len(self.arrival_times))
+        print("Number of requests processed:", len([x for x in self.departure_times if x!=-1]))
+        print("Number of requests lost:", len([x for x in self.departure_times if x==-1]))
+        print("Output rate:", len([x for x in self.departure_times if x!=-1])/self.observation_time, "requests per time unit")
+        print("Average treatment time:", np.mean(self.treatment_times), "time units")
+        service_times = [self.departure_times[i]-self.arrival_times[i] for i in range(len(self.arrival_times)) if self.departure_times[i]!=-1]
+        waiting_times = [service_times[i]-self.treatment_times[i] for i in range( len(service_times)) if service_times[i]!=-1]
+        print("Average waiting time:", np.mean(waiting_times), "time units")
 
 
 if __name__ == "__main__":
