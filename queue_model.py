@@ -123,13 +123,13 @@ class queue_model():
         print("Number of requests arrived:", len(self.arrival_times))
         print("Number of requests processed:", len([x for x in self.departure_times if x!=-1]))
         print("Number of requests lost:", len([x for x in self.departure_times if x==-1]))
-        print("Output rate:", len([x for x in self.departure_times if x!=-1])/self.departure_times[-1], "requests per time unit")
-        print("Loss rate:", round(len([x for x in self.departure_times if x==-1])/len(self.departure_times), 4)*100, "%")
-        print("Average service time:", np.mean([x for x in self.service_times if x!=-1]), "time units")
-        print("Average treatment time:", np.mean([x for x in self.treatment_times if x!=-1]), "time units")
-        print("Average waiting time:", np.mean([x for x in self.waiting_times if x!=-1]), "time units")
-        print("Average number of requests in system:", sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.departure_times[-1]), "requests")
-
+        print("Output rate:", round(len([x for x in self.departure_times if x!=-1])/(max(self.observation_time, self.departure_times[-1])), 2), "requests per time unit")
+        print("Loss rate:", round(len([x for x in self.departure_times if x==-1])/len(self.departure_times)*100, 2), "%")
+        print("Average service time:", round(np.mean([x for x in self.service_times if x!=-1]), 2), "time units")
+        print("Average treatment time:", round(np.mean([x for x in self.treatment_times if x!=-1]), 2), "time units")
+        print("Average waiting time:", round(np.mean([x for x in self.waiting_times if x!=-1]), 2), "time units")
+        print("Average number of requests in system:", round(sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.departure_times[-1]), 2), "requests")
+        print("Occupancy rate:", round(sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.buffer_size+2)])/(self.departure_times[-1])*100, 2), "%")	
 
 if __name__ == "__main__":
     LAMBDA = 300-50*2 # 200
