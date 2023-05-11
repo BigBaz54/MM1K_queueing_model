@@ -129,10 +129,10 @@ class queue_model():
         return len([x for x in self.departure_times if x==-1])
     
     def get_output_rate(self):
-        return len([x for x in self.departure_times if x!=-1])/(max(self.observation_time, self.departure_times[-1]))
+        return self.get_number_of_requests_processed()/(max(self.observation_time, self.departure_times[-1]))
     
     def get_loss_rate(self):
-        return len([x for x in self.departure_times if x==-1])/len(self.departure_times)
+        return self.get_number_of_requests_lost()/len(self.departure_times)
     
     def get_average_service_time(self):
         return np.mean([x for x in self.service_times if x!=-1])
