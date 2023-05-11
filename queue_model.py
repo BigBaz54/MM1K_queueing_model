@@ -103,7 +103,7 @@ class queue_model():
     def plot_simulation(self):
         processed_arrivals = []
         processed_departures = []
-        time = np.linspace(0, self.departure_times[-1], 10000)
+        time = np.linspace(0, self.observation_time, 10000)
         # number of requests arrived at every time t
         processed_arrivals = [len([x for x in self.arrival_times if x <= t]) for t in time]
         # number of requests processed at every time t
@@ -113,7 +113,7 @@ class queue_model():
         plt.show()
 
     def plot_raw_simulation(self):
-        time = np.linspace(0, self.departure_times[-1], len(self.departure_times))
+        time = np.linspace(0, self.observation_time, len(self.departure_times))
         plt.plot(time, self.arrival_times)
         plt.plot(time, self.departure_times)
         plt.show()
@@ -122,13 +122,13 @@ class queue_model():
         return len(self.arrival_times)
     
     def get_number_of_requests_processed(self):
-        return len([x for x in self.departure_times if x!=-1])
+        return len([x for x in self.departure_times if x!=-1 and x<=self.observation_time])
     
     def get_number_of_requests_lost(self):
-        return len([x for x in self.departure_times if x==-1])
+        return self.get_number_of_requests_arrived() - self.get_number_of_requests_processed()
     
     def get_output_rate(self):
-        return self.get_number_of_requests_processed()/(max(self.observation_time, self.departure_times[-1]))
+        return self.get_number_of_requests_processed()/self.observation_time
     
     def get_loss_rate(self):
         return self.get_number_of_requests_lost()/len(self.departure_times)
@@ -143,10 +143,10 @@ class queue_model():
         return np.mean([x for x in self.waiting_times if x!=-1])
     
     def get_average_number_of_requests_in_system(self):
-        return sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.departure_times[-1])
+        return sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.observation_time)
     
     def get_occupancy_rate(self):
-        return sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.buffer_size+2)])/(self.departure_times[-1])
+        return sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.buffer_size+2)])/(self.observation_time)
 
     def print_statistics(self):
         print("Number of requests arrived:", self.get_number_of_requests_arrived())
