@@ -119,17 +119,47 @@ class queue_model():
         plt.plot(time, self.departure_times)
         plt.show()
 
+    def get_number_of_requests_arrived(self):
+        return len(self.arrival_times)
+    
+    def get_number_of_requests_processed(self):
+        return len([x for x in self.departure_times if x!=-1])
+    
+    def get_number_of_requests_lost(self):
+        return len([x for x in self.departure_times if x==-1])
+    
+    def get_output_rate(self):
+        return len([x for x in self.departure_times if x!=-1])/(max(self.observation_time, self.departure_times[-1]))
+    
+    def get_loss_rate(self):
+        return len([x for x in self.departure_times if x==-1])/len(self.departure_times)
+    
+    def get_average_service_time(self):
+        return np.mean([x for x in self.service_times if x!=-1])
+    
+    def get_average_treatment_time(self):
+        return np.mean([x for x in self.treatment_times if x!=-1])
+    
+    def get_average_waiting_time(self):
+        return np.mean([x for x in self.waiting_times if x!=-1])
+    
+    def get_average_number_of_requests_in_system(self):
+        return sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.departure_times[-1])
+    
+    def get_occupancy_rate(self):
+        return sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.buffer_size+2)])/(self.departure_times[-1])
+
     def print_statistics(self):
-        print("Number of requests arrived:", len(self.arrival_times))
-        print("Number of requests processed:", len([x for x in self.departure_times if x!=-1]))
-        print("Number of requests lost:", len([x for x in self.departure_times if x==-1]))
-        print("Output rate:", round(len([x for x in self.departure_times if x!=-1])/(max(self.observation_time, self.departure_times[-1])), 2), "requests per time unit")
-        print("Loss rate:", round(len([x for x in self.departure_times if x==-1])/len(self.departure_times)*100, 2), "%")
-        print("Average service time:", round(np.mean([x for x in self.service_times if x!=-1]), 2), "time units")
-        print("Average treatment time:", round(np.mean([x for x in self.treatment_times if x!=-1]), 2), "time units")
-        print("Average waiting time:", round(np.mean([x for x in self.waiting_times if x!=-1]), 2), "time units")
-        print("Average number of requests in system:", round(sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.departure_times[-1]), 2), "requests")
-        print("Occupancy rate:", round(sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.buffer_size+2)])/(self.departure_times[-1])*100, 2), "%")	
+        print("Number of requests arrived:", self.get_number_of_requests_arrived())
+        print("Number of requests processed:", self.get_number_of_requests_processed())
+        print("Number of requests lost:", self.get_number_of_requests_lost())
+        print("Output rate:", round(self.get_output_rate(), 2), "requests per time unit")
+        print("Loss rate:", round(self.get_loss_rate()*100, 2), "%")
+        print("Average service time:", round(self.get_average_service_time(), 2), "time units")
+        print("Average treatment time:", round(self.get_average_treatment_time(), 2), "time units")
+        print("Average waiting time:", round(self.get_average_waiting_time(), 2), "time units")
+        print("Average number of requests in system:", round(self.get_average_number_of_requests_in_system(), 2), "requests")
+        print("Occupancy rate:", round(self.get_occupancy_rate()*100, 2), "%")	
 
 if __name__ == "__main__":
     LAMBDA = 300-50*2 # 200
