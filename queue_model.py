@@ -149,6 +149,10 @@ class queue_model():
     def get_average_number_of_requests_in_system(self):
         return sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.observation_time)
     
+    def get_average_number_of_requests_in_system_approx(self, nb_points=1000):
+        time_points = np.linspace(0, self.observation_time, nb_points)
+        return sum([self.get_requests_in_system(t) for t in time_points])/nb_points
+    
     def get_occupancy_rate(self):
         return sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.buffer_size+2)])/(self.observation_time)
 
@@ -162,6 +166,7 @@ class queue_model():
         print("Average treatment time:", round(self.get_average_treatment_time(), 2), "time units")
         print("Average waiting time:", round(self.get_average_waiting_time(), 2), "time units")
         print("Average number of requests in system:", round(self.get_average_number_of_requests_in_system(), 2), "requests")
+        print("Average number of requests in system (approximation):", round(self.get_average_number_of_requests_in_system_approx(100), 2), "requests")
         print("Occupancy rate:", round(self.get_occupancy_rate()*100, 2), "%")	
 
 if __name__ == "__main__":
