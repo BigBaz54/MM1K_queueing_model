@@ -17,7 +17,11 @@ class queue_model():
         self.waiting_times = []
 
     def get_requests_in_system(self, t):
-        return len([x for x in self.departure_times if (x > t)])
+        count = 0
+        for i in range(len(self.departure_times)):
+            if self.arrival_times[i] <= t and (self.departure_times[i] > t):
+                count += 1
+        return count
     
     def get_requests_in_buffer(self, t):
         return self.get_requests_in_system(t) - 1 if self.get_requests_in_system(t) > 0 else 0
