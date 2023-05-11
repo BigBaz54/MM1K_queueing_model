@@ -148,4 +148,4 @@ if __name__ == "__main__":
         loss_rates.append(len([x for x in qm.departure_times if x==-1])/len(qm.departure_times))
     plt.plot(range(1, 10+2*2), loss_rates)
     plt.show()
-        
+    
