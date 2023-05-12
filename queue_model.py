@@ -11,6 +11,7 @@ class queue_model():
         self.service_rate = service_rate
         self.observation_time = observation_time
         self.buffer_size = buffer_size
+        self.max_requests_in_system = 0
         self.arrival_times = []
         self.departure_times = []
         self.treatment_times = []
@@ -29,7 +30,7 @@ class queue_model():
         
     def get_time_spent_with_n_requests_in_system(self):
         # initialize
-        total_time = {i:0 for i in range(self.buffer_size+2)}
+        total_time = {i:0 for i in range(self.max_requests_in_system+2)}
         processed_arrivals = []
         processed_departures = []
         for i in range(len(self.arrival_times)):
@@ -84,6 +85,9 @@ class queue_model():
             last_arrival += random_var_exp(self.arrival_rate)
             arrival_times.append(last_arrival)
             nb_requests_in_buffer = self.get_requests_in_buffer(last_arrival)
+            nb_requests_in_system = self.get_requests_in_system(last_arrival)
+            if nb_requests_in_system > self.max_requests_in_system:
+                self.max_requests_in_system = nb_requests_in_system
             if nb_requests_in_buffer >= self.buffer_size:
                 # request is lost
                 departure_times.append(-1)
@@ -93,7 +97,7 @@ class queue_model():
             else:
                 # request is processed
                 treatment_time = random_var_exp(self.service_rate)
-                if self.get_requests_in_system(last_arrival) == 0:
+                if nb_requests_in_system == 0:
                     # no requests in system, the current request will be processed immediately
                     last_departure = last_arrival + treatment_time
                 else:
@@ -148,39 +152,38 @@ class queue_model():
         return np.mean([x for x in self.waiting_times if x!=-1])
     
     def get_average_number_of_requests_in_system(self):
-        return sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.buffer_size+2)])/(self.observation_time)
+        return sum([i*self.get_time_spent_with_n_requests_in_system()[i] for i in range(self.max_requests_in_system+1)])/(self.observation_time)
     
     def get_average_number_of_requests_in_system_approx(self, nb_points=1000):
         time_points = np.linspace(0, self.observation_time, nb_points)
         return sum([self.get_requests_in_system(t) for t in time_points])/nb_points
     
     def get_occupancy_rate(self):
-        return sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.buffer_size+2)])/(self.observation_time)
+        return sum([self.get_time_spent_with_n_requests_in_system()[i] for i in range(1, self.max_requests_in_system+1)])/(self.observation_time)
 
     def print_statistics(self):
         print("Number of requests arrived:", self.get_number_of_requests_arrived())
         print("Number of requests processed:", self.get_number_of_requests_processed())
         print("Number of requests lost:", self.get_number_of_requests_lost())
+        print("Maximum number of requests in system:", self.max_requests_in_system)
         print("Output rate:", round(self.get_output_rate(), 2), "requests per time unit")
         print("Loss rate:", round(self.get_loss_rate()*100, 2), "%")
         print("Average service time:", round(self.get_average_service_time(), 2), "time units")
         print("Average treatment time:", round(self.get_average_treatment_time(), 2), "time units")
         print("Average waiting time:", round(self.get_average_waiting_time(), 2), "time units")
         t = time.time()
-        self.get_average_number_of_requests_in_system()
+        print("Average number of requests in system:", round(self.get_average_number_of_requests_in_system(), 2), "requests")
         print("Time spent computing average number of requests in system:", time.time()-t, "seconds")
         t = time.time()
-        self.get_average_number_of_requests_in_system_approx(1000)
-        print("Time spent computing average number of requests in system (approximation):", time.time()-t, "seconds")
-        print("Average number of requests in system:", round(self.get_average_number_of_requests_in_system(), 2), "requests")
         print("Average number of requests in system (approximation):", round(self.get_average_number_of_requests_in_system_approx(100), 2), "requests")
+        print("Time spent computing average number of requests in system (approximation):", time.time()-t, "seconds")
         print("Occupancy rate:", round(self.get_occupancy_rate()*100, 2), "%")	
 
 if __name__ == "__main__":
     LAMBDA = 300-50*2 # 200
     MU = 1/(2*2/1000) # 250
     
-    qm = queue_model(LAMBDA, MU, 2, 5)
+    qm = queue_model(LAMBDA, MU, 10)
     qm.run_simulation()
     qm.plot_simulation()
     qm.print_statistics()
