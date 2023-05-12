@@ -117,6 +117,6 @@ def sequential(lam, mu, observation_time):
         print(f'{"Occupancy rate:":>40}', f'mean: {np.mean(occupancy_rate):<25}', '|', f'std: {np.std(occupancy_rate):<25}', '|', f'CI95: [{np.mean(occupancy_rate)-1.96*np.std(occupancy_rate)/np.sqrt(size)}; {np.mean(occupancy_rate)+1.96*np.std(occupancy_rate)/np.sqrt(size)}]')
         print('\nTime elapsed:', MPI.Wtime()-t)
 
-sequential(LAMBDA, MU, 1)
+# sequential(LAMBDA, MU, 1)
 
 
