@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -165,6 +166,12 @@ class queue_model():
         print("Average service time:", round(self.get_average_service_time(), 2), "time units")
         print("Average treatment time:", round(self.get_average_treatment_time(), 2), "time units")
         print("Average waiting time:", round(self.get_average_waiting_time(), 2), "time units")
+        t = time.time()
+        self.get_average_number_of_requests_in_system()
+        print("Time spent computing average number of requests in system:", time.time()-t, "seconds")
+        t = time.time()
+        self.get_average_number_of_requests_in_system_approx(1000)
+        print("Time spent computing average number of requests in system (approximation):", time.time()-t, "seconds")
         print("Average number of requests in system:", round(self.get_average_number_of_requests_in_system(), 2), "requests")
         print("Average number of requests in system (approximation):", round(self.get_average_number_of_requests_in_system_approx(100), 2), "requests")
         print("Occupancy rate:", round(self.get_occupancy_rate()*100, 2), "%")	
