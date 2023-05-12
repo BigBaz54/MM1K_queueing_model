@@ -65,50 +65,58 @@ def parallel(lam, mu, observation_time):
         comm.send(qm.get_average_number_of_requests_in_system(), dest=0, tag=19)
         comm.send(qm.get_occupancy_rate(), dest=0, tag=25)
 
-parallel(LAMBDA, MU, 60)
+parallel(LAMBDA, MU, 1)
 
-# # sequential version
-# t = MPI.Wtime()
-# LAMBDA = 300-50*2 # 200
-# MU = 1/(2*2/1000) # 250
+# sequential version
+def sequential(lam, mu, observation_time):
+    t = MPI.Wtime()
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    if rank == 0:
+        print('\n\n\n')
+        requests_arrived = []
+        requests_processed = []
+        requests_lost = []
+        output_rate = []
+        loss_rate = []
+        average_service_time = []
+        average_treatment_time = []
+        average_waiting_time = []
+        average_number_of_requests_in_system = []
+        occupancy_rate = []
 
-# if rank == 0:
-#     print('\n\n\n')
-#     requests_arrived = []
-#     requests_processed = []
-#     requests_lost = []
-#     output_rate = []
-#     loss_rate = []
-#     average_service_time = []
-#     average_treatment_time = []
-#     average_waiting_time = []
-#     average_number_of_requests_in_system = []
-#     occupancy_rate = []
+        for _ in range(size):
+            qm = queue_model.queue_model(LAMBDA, MU, observation_time)
+            qm.run_simulation()
+            requests_arrived.append(qm.get_number_of_requests_arrived())
+            requests_processed.append(qm.get_number_of_requests_processed())
+            requests_lost.append(qm.get_number_of_requests_lost())
+            output_rate.append(qm.get_output_rate())
+            loss_rate.append(qm.get_loss_rate())
+            average_service_time.append(qm.get_average_service_time())
+            average_treatment_time.append(qm.get_average_treatment_time())
+            average_waiting_time.append(qm.get_average_waiting_time())
+            average_number_of_requests_in_system.append(qm.get_average_number_of_requests_in_system())
+            occupancy_rate.append(qm.get_occupancy_rate())
+        
+        print('Number of simulations:', size, '\n')
+        print('LAMBDA:', lam)
+        print('MU:', mu, '\n')
 
-#     for i in range(size):
-#         qm = queue_model.queue_model(LAMBDA, MU, 2, 5)
-#         qm.run_simulation()
-#         requests_arrived.append(qm.get_number_of_requests_arrived())
-#         requests_processed.append(qm.get_number_of_requests_processed())
-#         requests_lost.append(qm.get_number_of_requests_lost())
-#         output_rate.append(qm.get_output_rate())
-#         loss_rate.append(qm.get_loss_rate())
-#         average_service_time.append(qm.get_average_service_time())
-#         average_treatment_time.append(qm.get_average_treatment_time())
-#         average_waiting_time.append(qm.get_average_waiting_time())
-#         average_number_of_requests_in_system.append(qm.get_average_number_of_requests_in_system())
-#         occupancy_rate.append(qm.get_occupancy_rate())
-#     print('== Sequential version ==\n')
-#     print('Requests arrived:', np.mean(requests_arrived))
-#     print('Requests processed:', np.mean(requests_processed))
-#     print('Requests lost:', np.mean(requests_lost))
-#     print('Output rate:', np.mean(output_rate))
-#     print('Loss rate:', np.mean(loss_rate))
-#     print('Average service time:', np.mean(average_service_time))
-#     print('Average treatment time:', np.mean(average_treatment_time))
-#     print('Average waiting time:', np.mean(average_waiting_time))
-#     print('Average number of requests in system:', np.mean(average_number_of_requests_in_system))
-#     print('Occupancy rate:', np.mean(occupancy_rate))
-#     print('\nTime elapsed:', MPI.Wtime()-t)
+        print('== Sequential version ==\n')
+        print(f'{"Requests arrived:":>40}', f'mean: {np.mean(requests_arrived):<25}', '|', f'std: {np.std(requests_arrived):<25}', '|', f'CI95: [{np.mean(requests_arrived)-1.96*np.std(requests_arrived)/np.sqrt(size)}; {np.mean(requests_arrived)+1.96*np.std(requests_arrived)/np.sqrt(size)}]')
+        print(f'{"Requests processed:":>40}', f'mean: {np.mean(requests_processed):<25}', '|', f'std: {np.std(requests_processed):<25}', '|', f'CI95: [{np.mean(requests_processed)-1.96*np.std(requests_processed)/np.sqrt(size)}; {np.mean(requests_processed)+1.96*np.std(requests_processed)/np.sqrt(size)}]')
+        print(f'{"Requests lost:":>40}', f'mean: {np.mean(requests_lost):<25}', '|', f'std: {np.std(requests_lost):<25}', '|', f'CI95: [{np.mean(requests_lost)-1.96*np.std(requests_lost)/np.sqrt(size)}; {np.mean(requests_lost)+1.96*np.std(requests_lost)/np.sqrt(size)}]')
+        print(f'{"Output rate:":>40}', f'mean: {np.mean(output_rate):<25}', '|', f'std: {np.std(output_rate):<25}', '|', f'CI95: [{np.mean(output_rate)-1.96*np.std(output_rate)/np.sqrt(size)}; {np.mean(output_rate)+1.96*np.std(output_rate)/np.sqrt(size)}]')
+        print(f'{"Loss rate:":>40}', f'mean: {np.mean(loss_rate):<25}', '|', f'std: {np.std(loss_rate):<25}', '|', f'CI95: [{np.mean(loss_rate)-1.96*np.std(loss_rate)/np.sqrt(size)}; {np.mean(loss_rate)+1.96*np.std(loss_rate)/np.sqrt(size)}]')
+        print(f'{"Average service time:":>40}', f'mean: {np.mean(average_service_time):<25}', '|', f'std: {np.std(average_service_time):<25}', '|', f'CI95: [{np.mean(average_service_time)-1.96*np.std(average_service_time)/np.sqrt(size)}; {np.mean(average_service_time)+1.96*np.std(average_service_time)/np.sqrt(size)}]')
+        print(f'{"Average treatment time:":>40}', f'mean: {np.mean(average_treatment_time):<25}', '|', f'std: {np.std(average_treatment_time):<25}', '|', f'CI95: [{np.mean(average_treatment_time)-1.96*np.std(average_treatment_time)/np.sqrt(size)}; {np.mean(average_treatment_time)+1.96*np.std(average_treatment_time)/np.sqrt(size)}]')
+        print(f'{"Average waiting time:":>40}', f'mean: {np.mean(average_waiting_time):<25}', '|', f'std: {np.std(average_waiting_time):<25}', '|', f'CI95: [{np.mean(average_waiting_time)-1.96*np.std(average_waiting_time)/np.sqrt(size)}; {np.mean(average_waiting_time)+1.96*np.std(average_waiting_time)/np.sqrt(size)}]')
+        print(f'{"Average number of requests in system:":>40}', f'mean: {np.mean(average_number_of_requests_in_system):<25}', '|', f'std: {np.std(average_number_of_requests_in_system):<25}', '|', f'CI95: [{np.mean(average_number_of_requests_in_system)-1.96*np.std(average_number_of_requests_in_system)/np.sqrt(size)}; {np.mean(average_number_of_requests_in_system)+1.96*np.std(average_number_of_requests_in_system)/np.sqrt(size)}]')
+        print(f'{"Occupancy rate:":>40}', f'mean: {np.mean(occupancy_rate):<25}', '|', f'std: {np.std(occupancy_rate):<25}', '|', f'CI95: [{np.mean(occupancy_rate)-1.96*np.std(occupancy_rate)/np.sqrt(size)}; {np.mean(occupancy_rate)+1.96*np.std(occupancy_rate)/np.sqrt(size)}]')
+        print('\nTime elapsed:', MPI.Wtime()-t)
+
+sequential(LAMBDA, MU, 1)
 
 
