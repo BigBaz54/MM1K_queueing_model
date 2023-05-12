@@ -93,11 +93,11 @@ class queue_model():
             else:
                 # request is processed
                 treatment_time = random_var_exp(self.service_rate)
-                if nb_requests_in_buffer == 0:
-                    # no requests in buffer, the current request will be processed immediately
+                if self.get_requests_in_system(last_arrival) == 0:
+                    # no requests in system, the current request will be processed immediately
                     last_departure = last_arrival + treatment_time
                 else:
-                    # requests in buffer, the current request will be processed after the last one
+                    # requests in system, the current request will be processed after the last one
                     last_departure = last_departure + treatment_time
                 departure_times.append(last_departure)
                 treatment_times.append(treatment_time)
