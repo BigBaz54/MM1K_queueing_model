@@ -87,7 +87,7 @@ def parallel(lam, mu, observation_time):
         comm.send(qm.get_occupancy_rate(), dest=0, tag=25)
         print(f'Process {rank} finished')
 
-parallel(LAMBDA, MU, 2)
+parallel(MU, MU, 2)
 
 # sequential version
 def sequential(lam, mu, observation_time):
@@ -155,6 +155,6 @@ def sequential(lam, mu, observation_time):
             print(f'{"Occupancy rate:":>40}', f'mean: {np.mean(occupancy_rate):<25}', '|', f'std: {np.std(occupancy_rate):<25}', '|', f'CI95 (student): [{np.mean(occupancy_rate)-t975*get_std(occupancy_rate, np.mean(occupancy_rate))/np.sqrt(size)}; {np.mean(occupancy_rate)+t975*get_std(occupancy_rate, np.mean(occupancy_rate))/np.sqrt(size)}]')
             print('\nTime elapsed:', MPI.Wtime()-time)
 
-sequential(LAMBDA, MU, 2)
+# sequential(LAMBDA, MU, 2)
 
 
