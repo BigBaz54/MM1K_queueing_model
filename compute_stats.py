@@ -64,6 +64,7 @@ def parallel(lam, mu, observation_time):
         comm.send(qm.get_average_waiting_time(), dest=0, tag=18)
         comm.send(qm.get_average_number_of_requests_in_system(), dest=0, tag=19)
         comm.send(qm.get_occupancy_rate(), dest=0, tag=25)
+        print(f'Process {rank} finished')
 
 parallel(LAMBDA, MU, 1)
 
