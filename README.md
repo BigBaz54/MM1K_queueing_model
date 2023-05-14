@@ -4,9 +4,11 @@ This project was made for the Performance Evaluation course of TÉLÉCOM Nancy (
 
 ## How to run
 queue_model.py can be runned using python as long the libraries numpy and matplotlib.pyplot are installed.
-You can then use ```python3 queue_model.py```
 
-compute_stats.py needs the libraries mpi4py and scipy.stats to be installed and a working MPI implementation, preferably supporting MPI-3 and built with shared/dynamic libraries. (https://mpi4py.readthedocs.io/en/stable/install.html?)
+You can then use```python3 queue_model.py```.
+
+compute_stats.py needs the libraries mpi4py and scipy.stats to be installed and a working MPI implementation, preferably supporting MPI-3 and built with shared/dynamic libraries. (https://mpi4py.readthedocs.io/en/stable/install.html)
+
 You can then use ```mpirun -np 10 python3 compute_stats.py``` to run with 10 processes.
 
 ## How to use
