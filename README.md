@@ -3,7 +3,7 @@
 This project was made for the Performance Evaluation course of TÉLÉCOM Nancy (2nd Year).
 
 ## How to run
-`queue_model.py` can be runned using python as long the libraries `numpy` and `matplotlib.pyplot` are installed.
+`queue_model.py` can be run using python as long the libraries `numpy` and `matplotlib.pyplot` are installed.
 
 You can then use```python3 queue_model.py```.
 
